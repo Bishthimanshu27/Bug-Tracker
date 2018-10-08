@@ -41,7 +41,7 @@ namespace Bug_tracker.Migrations
                 roleManager.Create(new IdentityRole { Name = "Submitter" });
             }
             ApplicationUser adminUser;
-            if (!context.Users.Any(item => item.UserName == "admin@admin.com"))
+            if (!context.Users.Any(item => item.Email == "admin@admin.com"))
             {
                 adminUser = new ApplicationUser();
                 adminUser.UserName = "admin@admin.com";

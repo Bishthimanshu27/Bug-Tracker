@@ -9,11 +9,14 @@ using System.Web.Mvc;
 using Bug_tracker.Models;
 using Bug_tracker.Models.Classes;
 
-namespace Bug_tracker.Controllers
+
+namespace GuiBugTracker.Controllers
 {
+    [Authorize(Roles = "Admin,Project Manager")]
     public class ProjectsController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
+
 
         // GET: Projects
         public ActionResult Index()
@@ -113,6 +116,54 @@ namespace Bug_tracker.Controllers
             Project project = db.Projects.Find(id);
             db.Projects.Remove(project);
             db.SaveChanges();
+            return RedirectToAction("Index");
+        }
+
+        public ActionResult AssignUsers(int id)
+        {
+            var model = new ProjectAssignViewModel();
+
+            model.Id = id;
+
+            var project = db.Projects.FirstOrDefault(p => p.Id == id);
+            var users = db.Users.ToList();
+            var userIdsAssignedToProject = project.Users
+                .Select(p => p.Id).ToList();
+
+            model.UserList = new MultiSelectList(users, "Id", "Name", userIdsAssignedToProject);
+
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public ActionResult AssignUsers(ProjectAssignViewModel model)
+        {
+            //STEP 1: Find the project
+            var project = db.Projects.FirstOrDefault(p => p.Id == model.Id);
+
+            //STEP 2: Remove all assigned users from this project
+            var assignedUsers = project.Users.ToList();
+
+            foreach (var user in assignedUsers)
+            {
+                project.Users.Remove(user);
+            }
+
+            //STEP 3: Assign users to the project
+            if (model.SelectedUsers != null)
+            {
+                foreach (var userId in model.SelectedUsers)
+                {
+                    var user = db.Users.FirstOrDefault(p => p.Id == userId);
+
+                    project.Users.Add(user);
+                }
+            }
+
+            //STEP 4: Save changes to the database
+            db.SaveChanges();
+
             return RedirectToAction("Index");
         }
 

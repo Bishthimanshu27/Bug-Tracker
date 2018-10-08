@@ -6,15 +6,16 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
+using Bug_tracker;
 using Bug_tracker.Models;
-using Bug_tracker.Helper;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
+using Microsoft.Owin.Security;
 
 namespace Bug_tracker.Controllers
 {
-    [Authorize]
+   
     public class ApplicationUsersController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
@@ -24,17 +25,21 @@ namespace Bug_tracker.Controllers
         {
             return View(db.Users.ToList());
         }
-
+        [Authorize(Roles ="Admin")]
         public ActionResult ChangeRole(string id)
         {
             var model = new UserRoleViewModel();
-            var userRoleHelper = new UserRoleHelper();
+
+            var userManager = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(db));
+            var roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(db));
+
+            var user = userManager.FindById(id);
 
             model.Id = id;
             model.Name = User.Identity.Name;
 
-            var roles = userRoleHelper.GetAllRoles();
-            var userRoles = userRoleHelper.GetUserRoles(id);
+            var roles = roleManager.Roles.ToList();
+            var userRoles = userManager.GetRoles(id);
 
             model.Roles = new MultiSelectList(roles, "Name", "Name", userRoles);
 
@@ -62,10 +67,11 @@ namespace Bug_tracker.Controllers
             foreach (var role in model.SelectedRoles)
             {
                 userManager.AddToRole(user.Id, role);
-            }
+            };
+
             //STEP 5: Refresh authentication cookies so the roles are updated instantly
-            var signInManager = HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
-            signInManager.SignIn(user, isPersistent: false, rememberBrowser: false);
+            //var signInManager = HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
+            //signInManager.SignIn(user, isPersistent: false, rememberBrowser: false);
 
             return RedirectToAction("Index");
         }

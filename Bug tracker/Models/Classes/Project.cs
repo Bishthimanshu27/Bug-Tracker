@@ -11,6 +11,7 @@ namespace Bug_tracker.Models.Classes
         public string Name { get; set; }
 
 
+
         public Project()
         {
             Users = new HashSet<ApplicationUser>();
