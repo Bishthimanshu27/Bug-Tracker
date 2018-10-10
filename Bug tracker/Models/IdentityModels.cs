@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
+using System.EnterpriseServices.Internal;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Bug_tracker.Models.Classes;
@@ -14,7 +16,10 @@ namespace Bug_tracker.Models
         public string LastName { get; set; }
         public string FirstName { get; set; }
         public string DisplayName { get; set; }
-
+        [InverseProperty("Creater")]
+        public virtual ICollection<Tickets> CreatedTickets { get; set; }
+        [InverseProperty("Assignee")]
+        public virtual ICollection<Tickets> AssignedTickets { get; set; }
         public ApplicationUser()
         {
             Projects = new HashSet<Project>();
@@ -46,5 +51,10 @@ namespace Bug_tracker.Models
 
         public System.Data.Entity.DbSet<Bug_tracker.Models.Classes.Project> Projects { get; set; }
 
+        public System.Data.Entity.DbSet<Bug_tracker.Models.Classes.Tickets> Tickets { get; set; }
+
+        public System.Data.Entity.DbSet<Bug_tracker.Models.Classes.TicketStatus> TicketStatuses { get; set; }
+        public System.Data.Entity.DbSet<Bug_tracker.Models.Classes.TicketPriority> TicketPriorities { get; set; }
+        public System.Data.Entity.DbSet<Bug_tracker.Models.Classes.TicketType> TicketTypes { get; set; }
     }
 }
