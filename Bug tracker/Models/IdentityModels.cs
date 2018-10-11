@@ -26,7 +26,7 @@ namespace Bug_tracker.Models
         }
 
         public virtual ICollection<Project> Projects { get; set; }
-       
+
 
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
         {
@@ -50,9 +50,7 @@ namespace Bug_tracker.Models
         }
 
         public System.Data.Entity.DbSet<Bug_tracker.Models.Classes.Project> Projects { get; set; }
-
         public System.Data.Entity.DbSet<Bug_tracker.Models.Classes.Tickets> Tickets { get; set; }
-
         public System.Data.Entity.DbSet<Bug_tracker.Models.Classes.TicketStatus> TicketStatuses { get; set; }
         public System.Data.Entity.DbSet<Bug_tracker.Models.Classes.TicketPriority> TicketPriorities { get; set; }
         public System.Data.Entity.DbSet<Bug_tracker.Models.Classes.TicketType> TicketTypes { get; set; }

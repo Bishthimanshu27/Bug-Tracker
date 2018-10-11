@@ -15,7 +15,7 @@ using Microsoft.Owin.Security;
 
 namespace Bug_tracker.Controllers
 {
-   
+
     public class ApplicationUsersController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
@@ -25,7 +25,7 @@ namespace Bug_tracker.Controllers
         {
             return View(db.Users.ToList());
         }
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         public ActionResult ChangeRole(string id)
         {
             var model = new UserRoleViewModel();

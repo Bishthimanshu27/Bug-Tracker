@@ -8,6 +8,7 @@ using System.Web;
 using System.Web.Mvc;
 using Bug_tracker.Models;
 using Bug_tracker.Models.Classes;
+using Microsoft.AspNet.Identity;
 
 namespace Bug_tracker.Controllers
 {
@@ -40,11 +41,11 @@ namespace Bug_tracker.Controllers
         // GET: Tickets/Create
         public ActionResult Create()
         {
-            ViewBag.AssigneeId = new SelectList(db.ApplicationUsers, "Id", "LastName");
-            ViewBag.CreaterId = new SelectList(db.ApplicationUsers, "Id", "LastName");
+            ViewBag.AssigneeId = new SelectList(db.Users, "Id", "LastName");
+            ViewBag.CreaterId = new SelectList(db.Users, "Id", "LastName");
             ViewBag.ProjectId = new SelectList(db.Projects, "Id", "Name");
             ViewBag.TicketPriorityId = new SelectList(db.TicketPriorities, "Id", "Name");
-            ViewBag.TicketStatusId = new SelectList(db.TicketStatus, "Id", "Name");
+            ViewBag.TicketStatusId = new SelectList(db.TicketStatuses, "Id", "Name");
             ViewBag.TicketTypeId = new SelectList(db.TicketTypes, "Id", "Name");
             return View();
         }
@@ -58,16 +59,18 @@ namespace Bug_tracker.Controllers
         {
             if (ModelState.IsValid)
             {
+                tickets.CreaterId = User.Identity.GetUserId();
+                tickets.TicketStatusId = 1;
                 db.Tickets.Add(tickets);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
 
-            ViewBag.AssigneeId = new SelectList(db.ApplicationUsers, "Id", "LastName", tickets.AssigneeId);
-            ViewBag.CreaterId = new SelectList(db.ApplicationUsers, "Id", "LastName", tickets.CreaterId);
+            ViewBag.AssigneeId = new SelectList(db.Users, "Id", "LastName", tickets.AssigneeId);
+            ViewBag.CreaterId = new SelectList(db.Users, "Id", "LastName", tickets.CreaterId);
             ViewBag.ProjectId = new SelectList(db.Projects, "Id", "Name", tickets.ProjectId);
             ViewBag.TicketPriorityId = new SelectList(db.TicketPriorities, "Id", "Name", tickets.TicketPriorityId);
-            ViewBag.TicketStatusId = new SelectList(db.TicketStatus, "Id", "Name", tickets.TicketStatusId);
+            ViewBag.TicketStatusId = new SelectList(db.TicketStatuses, "Id", "Name", tickets.TicketStatusId);
             ViewBag.TicketTypeId = new SelectList(db.TicketTypes, "Id", "Name", tickets.TicketTypeId);
             return View(tickets);
         }
@@ -84,11 +87,11 @@ namespace Bug_tracker.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.AssigneeId = new SelectList(db.ApplicationUsers, "Id", "LastName", tickets.AssigneeId);
-            ViewBag.CreaterId = new SelectList(db.ApplicationUsers, "Id", "LastName", tickets.CreaterId);
+            ViewBag.AssigneeId = new SelectList(db.Users, "Id", "LastName", tickets.AssigneeId);
+            ViewBag.CreaterId = new SelectList(db.Users, "Id", "LastName", tickets.CreaterId);
             ViewBag.ProjectId = new SelectList(db.Projects, "Id", "Name", tickets.ProjectId);
             ViewBag.TicketPriorityId = new SelectList(db.TicketPriorities, "Id", "Name", tickets.TicketPriorityId);
-            ViewBag.TicketStatusId = new SelectList(db.TicketStatus, "Id", "Name", tickets.TicketStatusId);
+            ViewBag.TicketStatusId = new SelectList(db.TicketStatuses, "Id", "Name", tickets.TicketStatusId);
             ViewBag.TicketTypeId = new SelectList(db.TicketTypes, "Id", "Name", tickets.TicketTypeId);
             return View(tickets);
         }
@@ -106,11 +109,11 @@ namespace Bug_tracker.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            ViewBag.AssigneeId = new SelectList(db.ApplicationUsers, "Id", "LastName", tickets.AssigneeId);
-            ViewBag.CreaterId = new SelectList(db.ApplicationUsers, "Id", "LastName", tickets.CreaterId);
+            ViewBag.AssigneeId = new SelectList(db.Users, "Id", "LastName", tickets.AssigneeId);
+            ViewBag.CreaterId = new SelectList(db.Users, "Id", "LastName", tickets.CreaterId);
             ViewBag.ProjectId = new SelectList(db.Projects, "Id", "Name", tickets.ProjectId);
             ViewBag.TicketPriorityId = new SelectList(db.TicketPriorities, "Id", "Name", tickets.TicketPriorityId);
-            ViewBag.TicketStatusId = new SelectList(db.TicketStatus, "Id", "Name", tickets.TicketStatusId);
+            ViewBag.TicketStatusId = new SelectList(db.TicketStatuses, "Id", "Name", tickets.TicketStatusId);
             ViewBag.TicketTypeId = new SelectList(db.TicketTypes, "Id", "Name", tickets.TicketTypeId);
             return View(tickets);
         }

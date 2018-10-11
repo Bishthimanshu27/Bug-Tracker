@@ -41,11 +41,11 @@ namespace Bug_tracker.Migrations
                 roleManager.Create(new IdentityRole { Name = "Submitter" });
             }
             ApplicationUser adminUser;
-            if (!context.Users.Any(item => item.Email == "admin@admin.com"))
+            if (!context.Users.Any(item => item.Email == "admin@gmail.com"))
             {
                 adminUser = new ApplicationUser();
-                adminUser.UserName = "admin@admin.com";
-                adminUser.Email = "admin@admin.com";
+                adminUser.UserName = "admin@gmail.com";
+                adminUser.Email = "admin@gmail.com";
                 adminUser.LastName = "Admin";
                 adminUser.FirstName = "Himanshu";
                 adminUser.DisplayName = "Himanshu Bisht";
@@ -59,6 +59,26 @@ namespace Bug_tracker.Migrations
             {
                 userManager.AddToRole(adminUser.Id, "Admin");
             }
+
+
+            context.TicketTypes.AddOrUpdate(x => x.Id,
+                new Models.Classes.TicketType() { Id = 1, Name = "Bug Fixes" },
+                new Models.Classes.TicketType() { Id = 2, Name = "Software Update" },
+                new Models.Classes.TicketType() { Id = 3, Name = "Adding Helpers" },
+                new Models.Classes.TicketType() { Id = 4, Name = "Database errors" });
+
+            context.TicketPriorities.AddOrUpdate(x => x.Id,
+                new Models.Classes.TicketPriority() { Id = 1, Name = "High" },
+                new Models.Classes.TicketPriority() { Id = 2, Name = "Medium" },
+                new Models.Classes.TicketPriority() { Id = 3, Name = "Low" },
+                new Models.Classes.TicketPriority() { Id = 4, Name = "Urgent" });
+
+            context.TicketStatuses.AddOrUpdate(x => x.Id,
+                new Models.Classes.TicketStatus() { Id = 1, Name = "Finished" },
+                new Models.Classes.TicketStatus() { Id = 2, Name = "Started" },
+                new Models.Classes.TicketStatus() { Id = 3, Name = "Not Started" },
+                new Models.Classes.TicketStatus() { Id = 4, Name = "In progress" });
+            context.SaveChanges();
         }
     }
 }

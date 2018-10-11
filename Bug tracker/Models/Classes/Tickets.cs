@@ -30,5 +30,10 @@ namespace Bug_tracker.Models.Classes
 
         public int ProjectId { get; set; }
         public virtual Project Project { get; set; }
+
+        public Tickets()
+        {
+            this.Created = DateTime.Now;
+        }
     }
 }

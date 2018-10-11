@@ -3,96 +3,107 @@
 @{
     ViewBag.Title = "Details";
 }
+<section id="main-content">
+    <section class="wrapper site-min-height">
+         <div class="row mt">
+            <div class="col-lg-12">
+                <p>
 
-<h2>Details</h2>
+                    <h2>Details</h2>
 
-<div>
-    <h4>Tickets</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>
-            @Html.DisplayNameFor(model => model.Assignee.LastName)
-        </dt>
+                    <div>
+                        <h4>Tickets</h4>
+                        <hr />
+                        <dl class="dl-horizontal">
+                            <dt>
+                               Assignee
+                            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Assignee.LastName)
-        </dd>
+                            <dd>
+                                @Html.DisplayFor(model => model.Assignee.LastName)
+                            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Creater.LastName)
-        </dt>
+                            <dt>
+                                Creater
+                            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Creater.LastName)
-        </dd>
+                            <dd>
+                               Creater
+                            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Project.Name)
-        </dt>
+                            <dt>
+                                Project
+                            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Project.Name)
-        </dd>
+                            <dd>
+                                @Html.DisplayFor(model => model.Project.Name)
+                            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.TicketPriority.Name)
-        </dt>
+                            <dt>
+                                TicketPriority
+                            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.TicketPriority.Name)
-        </dd>
+                            <dd>
+                                @Html.DisplayFor(model => model.TicketPriority.Name)
+                            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.TicketStatus.Name)
-        </dt>
+                            <dt>
+                                TicketStatus
+                            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.TicketStatus.Name)
-        </dd>
+                            <dd>
+                                @Html.DisplayFor(model => model.TicketStatus.Name)
+                            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.TicketType.Name)
-        </dt>
+                            <dt>
+                                TicketType
+                            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.TicketType.Name)
-        </dd>
+                            <dd>
+                                @Html.DisplayFor(model => model.TicketType.Name)
+                            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
+                            <dt>
+                                Name
+                            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Name)
-        </dd>
+                            <dd>
+                                @Html.DisplayFor(model => model.Name)
+                            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
+                            <dt>
+                                Description
+                            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Description)
-        </dd>
+                            <dd>
+                                @Html.DisplayFor(model => model.Description)
+                            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Created)
-        </dt>
+                            <dt>
+                               Created
+                            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Created)
-        </dd>
+                            <dd>
+                                @Html.DisplayFor(model => model.Created)
+                            </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.Updated)
-        </dt>
+                            <dt>
+                                Updated
+                            </dt>
 
-        <dd>
-            @Html.DisplayFor(model => model.Updated)
-        </dd>
+                            <dd>
+                                @Html.DisplayFor(model => model.Updated)
+                            </dd>
 
-    </dl>
-</div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>
+                        </dl>
+                    </div>
+                <p>
+                    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+                    @Html.ActionLink("Back to List", "Index")
+                </p>
+                </p>
+            </div>
+        </div>
+    </section>
+    <!-- /wrapper -->
+</section>
