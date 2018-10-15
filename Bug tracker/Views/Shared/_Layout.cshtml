@@ -16,6 +16,7 @@
     <link href="~/Content/style.css" rel="stylesheet" />
     <link href="~/Content/style-responsive.css" rel="stylesheet" />
     <link href="~/Content/zabuto_calendar.css" rel="stylesheet" />
+    @RenderSection("CSS", false)
 </head>
 <body>
     <section id="container">
@@ -244,10 +245,14 @@
                         </a>
                     </li>
                     <li class="sub-menu">
-                        <a href="@Url.Action("","Tickets")">
-                            <i class=" fa fa-bar-chart-o"></i>
+                        <a href="javascript:;">
+                            <i class="fa fa-comments-o"></i>
                             <span>Tickets</span>
                         </a>
+                        <ul class="sub">
+                            <li><a href="@Url.Action("","Tickets")">All Tickets</a></li>
+                            <li><a href="@Url.Action("SubmitterTickets", "tickets")">Your Tickets</a></li>
+                        </ul>
                     </li>
 
                 </ul>

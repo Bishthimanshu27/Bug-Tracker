@@ -41,11 +41,11 @@ namespace Bug_tracker.Migrations
                 roleManager.Create(new IdentityRole { Name = "Submitter" });
             }
             ApplicationUser adminUser;
-            if (!context.Users.Any(item => item.Email == "admin@gmail.com"))
+            if (!context.Users.Any(item => item.Email == "admin@admin.com"))
             {
                 adminUser = new ApplicationUser();
-                adminUser.UserName = "admin@gmail.com";
-                adminUser.Email = "admin@gmail.com";
+                adminUser.UserName = "admin@admin.com";
+                adminUser.Email = "admin@admin.com";
                 adminUser.LastName = "Admin";
                 adminUser.FirstName = "Himanshu";
                 adminUser.DisplayName = "Himanshu Bisht";
