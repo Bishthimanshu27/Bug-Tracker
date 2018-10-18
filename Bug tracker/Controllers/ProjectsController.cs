@@ -8,15 +8,14 @@ using System.Web;
 using System.Web.Mvc;
 using Bug_tracker.Models;
 using Bug_tracker.Models.Classes;
+using Microsoft.AspNet.Identity;
 
-
-namespace GuiBugTracker.Controllers
+namespace Bug_tracker.Controllers
 {
-    [Authorize(Roles = "Admin,Project Manager")]
+    //[Authorize(Roles ="Admin, Project Manager")]
     public class ProjectsController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
-
 
         // GET: Projects
         public ActionResult Index()
@@ -24,6 +23,13 @@ namespace GuiBugTracker.Controllers
             return View(db.Projects.ToList());
         }
 
+        public ActionResult MyProjects()
+        {
+            string userId = User.Identity.GetUserId();
+            var UsersIds = db.Users.Where(p => p.Id == userId).FirstOrDefault();
+            var projects = UsersIds.Projects.ToList();
+            return View("Index", projects);
+        }
         // GET: Projects/Details/5
         public ActionResult Details(int? id)
         {
@@ -122,17 +128,12 @@ namespace GuiBugTracker.Controllers
         public ActionResult AssignUsers(int id)
         {
             var model = new ProjectAssignViewModel();
-
             model.Id = id;
-
             var project = db.Projects.FirstOrDefault(p => p.Id == id);
             var users = db.Users.ToList();
             var userIdsAssignedToProject = project.Users
                 .Select(p => p.Id).ToList();
-
             model.UserList = new MultiSelectList(users, "Id", "Name", userIdsAssignedToProject);
-
-
             return View(model);
         }
 
@@ -141,29 +142,23 @@ namespace GuiBugTracker.Controllers
         {
             //STEP 1: Find the project
             var project = db.Projects.FirstOrDefault(p => p.Id == model.Id);
-
             //STEP 2: Remove all assigned users from this project
             var assignedUsers = project.Users.ToList();
-
             foreach (var user in assignedUsers)
             {
                 project.Users.Remove(user);
             }
-
             //STEP 3: Assign users to the project
             if (model.SelectedUsers != null)
             {
                 foreach (var userId in model.SelectedUsers)
                 {
                     var user = db.Users.FirstOrDefault(p => p.Id == userId);
-
                     project.Users.Add(user);
                 }
             }
-
             //STEP 4: Save changes to the database
             db.SaveChanges();
-
             return RedirectToAction("Index");
         }
 

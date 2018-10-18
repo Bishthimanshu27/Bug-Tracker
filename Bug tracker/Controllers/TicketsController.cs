@@ -6,12 +6,13 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
-using Bug_tracker.Helper;
 using Bug_tracker.Models;
 using Bug_tracker.Models.Classes;
+using BugTracker.helper;
 using Microsoft.AspNet.Identity;
 
-namespace Bug_tracker.Controllers
+
+namespace BugTracker.Controllers
 {
     [Authorize]
     public class TicketsController : Controller
@@ -25,13 +26,17 @@ namespace Bug_tracker.Controllers
         }
 
         // GET: Tickets
-        public ActionResult Index()
+        public ActionResult Index(string id)
         {
-            var tickets = db.Tickets.Include(t => t.Assignee).Include(t => t.Creater).Include(t => t.Project).Include(t => t.TicketPriority).Include(t => t.TicketStatus).Include(t => t.TicketType);
-            return View(tickets.ToList());
+            if (!string.IsNullOrWhiteSpace(id))
+            {
+                return View(db.Tickets.Include(t => t.TicketPriority).Include(t => t.Project).Include(t => t.TicketStatus).Include(t => t.TicketType).Where(p => p.CreaterId == User.Identity.GetUserId()).ToList());
+            }
+            return View(db.Tickets.Include(t => t.TicketPriority).Include(t => t.Project).Include(t => t.TicketStatus).Include(t => t.TicketType).ToList());
         }
-       
-        public ActionResult SubmitterTickets()
+
+        //Get UsreTickets
+        public ActionResult UserTickets()
         {
             string userID = User.Identity.GetUserId();
             if (User.IsInRole("Submitter"))
@@ -44,17 +49,45 @@ namespace Bug_tracker.Controllers
                 var tickets = db.Tickets.Where(t => t.AssigneeId == userID).Include(t => t.Creater).Include(t => t.Assignee).Include(t => t.Project);
                 return View("Index", tickets.ToList());
             }
+            if (User.IsInRole("Project Manager"))
+            {
+                return View(db.Tickets.Include(t => t.TicketPriority).Include(t => t.Project).Include(t => t.TicketStatus).Include(t => t.TicketType).Where(p => p.AssigneeId == userID).ToList());
+            }
+
             return View("Index");
         }
 
-        [Authorize(Roles = "Project Manager,Developer")]
+        // Project Manger and Developer Tickets
+        [Authorize(Roles = "Developer,Project Manager")]
         public ActionResult ProjectManagerOrDeveloperTickets()
         {
             string userId = User.Identity.GetUserId();
             var ProjectMangerOrDeveloperId = db.Users.Where(p => p.Id == userId).FirstOrDefault();
-            var ProjectId = ProjectMangerOrDeveloperId.Projects.Select(p => p.Id).FirstOrDefault();
-            var tickets = db.Tickets.Where(p => p.Id == ProjectId).ToList();
-            return View("Index", tickets);
+            //var ProjectId = ProjectMangerOrDeveloperId.Projects.Select(p => p.Id).FirstOrDefault();
+            //var tickets = db.Tickets.Where(p => p.Id == projectsIds).ToList();
+            var projectsIds = ProjectMangerOrDeveloperId.Projects.Select(p => p.Id).ToList();
+            var tickets1 = db.Tickets.Where(p => projectsIds.Contains(p.ProjectId)).ToList();
+            return View("Index", tickets1);
+        }
+
+        public ActionResult AssignDeveloper(int ticketId)
+        {
+            var model = new AssignDevelopersTicketModel();
+            var ticket = db.Tickets.FirstOrDefault(p => p.Id == ticketId);
+            var userRoleHelper = new UserRoleHelper();
+            var users = userRoleHelper.UsersInRole("Developer");
+            model.TicketId = ticketId;
+            model.DeveloperList = new SelectList(users, "Id", "Name");
+            return View(model);
+        }
+
+        [HttpPost]
+        public ActionResult AssignDeveloper(AssignDevelopersTicketModel model)
+        {
+            var ticket = db.Tickets.FirstOrDefault(p => p.Id == model.TicketId);
+            ticket.AssigneeId = model.SelectedDeveloperId;
+            db.SaveChanges();
+            return RedirectToAction("Index");
         }
 
         // GET: Tickets/Details/5
@@ -73,14 +106,13 @@ namespace Bug_tracker.Controllers
         }
 
         // GET: Tickets/Create
-        [Authorize(Roles ="Submitter")]
+        [Authorize(Roles = "Submitter")]
         public ActionResult Create()
         {
-            ViewBag.AssigneeId = new SelectList(db.Users, "Id", "LastName");
-            ViewBag.CreaterId = new SelectList(db.Users, "Id", "LastName");
+            ViewBag.AssigneeId = new SelectList(db.Users, "Id", "DisplayName");
+            ViewBag.CreaterId = new SelectList(db.Users, "Id", "DisplayName");
             ViewBag.ProjectId = new SelectList(db.Projects, "Id", "Name");
             ViewBag.TicketPriorityId = new SelectList(db.TicketPriorities, "Id", "Name");
-            ViewBag.TicketStatusId = new SelectList(db.TicketStatuses, "Id", "Name");
             ViewBag.TicketTypeId = new SelectList(db.TicketTypes, "Id", "Name");
             return View();
         }
@@ -91,7 +123,7 @@ namespace Bug_tracker.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Submitter")]
-        public ActionResult Create([Bind(Include = "Id,Name,Description,Created,Updated,TicketTypeId,TicketPriorityId,CreaterId,TicketStatusId,AssigneeId,ProjectId")] Tickets tickets)
+        public ActionResult Create([Bind(Include = "Id,Name,Description,TicketTypeId,TicketPriorityId,ProjectId")] Tickets tickets)
         {
             if (ModelState.IsValid)
             {
@@ -102,11 +134,8 @@ namespace Bug_tracker.Controllers
                 return RedirectToAction("Index");
             }
 
-            ViewBag.AssigneeId = new SelectList(db.Users, "Id", "LastName", tickets.AssigneeId);
-            ViewBag.CreaterId = new SelectList(db.Users, "Id", "LastName", tickets.CreaterId);
             ViewBag.ProjectId = new SelectList(db.Projects, "Id", "Name", tickets.ProjectId);
             ViewBag.TicketPriorityId = new SelectList(db.TicketPriorities, "Id", "Name", tickets.TicketPriorityId);
-            ViewBag.TicketStatusId = new SelectList(db.TicketStatuses, "Id", "Name", tickets.TicketStatusId);
             ViewBag.TicketTypeId = new SelectList(db.TicketTypes, "Id", "Name", tickets.TicketTypeId);
             return View(tickets);
         }
@@ -123,8 +152,8 @@ namespace Bug_tracker.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.AssigneeId = new SelectList(db.Users, "Id", "LastName", tickets.AssigneeId);
-            ViewBag.CreaterId = new SelectList(db.Users, "Id", "LastName", tickets.CreaterId);
+            ViewBag.AssigneeId = new SelectList(db.Users, "Id", "DisplayName", tickets.AssigneeId);
+            ViewBag.CreaterId = new SelectList(db.Users, "Id", "DisplayName", tickets.CreaterId);
             ViewBag.ProjectId = new SelectList(db.Projects, "Id", "Name", tickets.ProjectId);
             ViewBag.TicketPriorityId = new SelectList(db.TicketPriorities, "Id", "Name", tickets.TicketPriorityId);
             ViewBag.TicketStatusId = new SelectList(db.TicketStatuses, "Id", "Name", tickets.TicketStatusId);
@@ -148,8 +177,8 @@ namespace Bug_tracker.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            ViewBag.AssigneeId = new SelectList(db.Users, "Id", "LastName", tickets.AssigneeId);
-            ViewBag.CreaterId = new SelectList(db.Users, "Id", "LastName", tickets.CreaterId);
+            ViewBag.AssigneeId = new SelectList(db.Users, "Id", "DisplayName", tickets.AssigneeId);
+            ViewBag.CreaterId = new SelectList(db.Users, "Id", "DisplayName", tickets.CreaterId);
             ViewBag.ProjectId = new SelectList(db.Projects, "Id", "Name", tickets.ProjectId);
             ViewBag.TicketPriorityId = new SelectList(db.TicketPriorities, "Id", "Name", tickets.TicketPriorityId);
             ViewBag.TicketStatusId = new SelectList(db.TicketStatuses, "Id", "Name", tickets.TicketStatusId);
