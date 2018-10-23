@@ -1,0 +1,72 @@
+﻿@model Bug_tracker.Models.TicketComment
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>TicketComment</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Ticket.Name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Ticket.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.User.LastName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.User.LastName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Comment)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Comment)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Created)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Created)
+        </dd>
+
+    </dl>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <h3>Leave Your Comment</h3>
+            <b>===========================</b>
+            using (Html.BeginForm("CreateComment", "Tickets", new { id = Model.Id }, FormMethod.Post))
+            {
+                <input type="hidden" name="comment" />
+                <div class="col-md-10">
+                    <textarea name="body" placeholder="Your comment here..." class="form-control" cols="10" rows="8" id="comment"></textarea>
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <p>@TempData["ErrorMessage"]</p>
+                    }
+                </div>
+                <div class="col-md-10">
+                    <input type="submit" value="Comment" class="btn btn-danger">
+                </div>
+            }
+        }
+    </div>
+    <p>
+        @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+        @Html.ActionLink("Back to List", "Index")
+    </p>

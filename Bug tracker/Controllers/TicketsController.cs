@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using Bug_tracker.Models;
 using Bug_tracker.Models.Classes;
-using BugTracker.helper;
 using Microsoft.AspNet.Identity;
+using Bug_tracker.helper;
 
-
-namespace BugTracker.Controllers
+namespace Bug_tracker.Controllers
 {
     [Authorize]
     public class TicketsController : Controller
@@ -46,7 +46,7 @@ namespace BugTracker.Controllers
             }
             if (User.IsInRole("Developer"))
             {
-                var tickets = db.Tickets.Where(t => t.AssigneeId == userID).Include(t => t.Creater).Include(t => t.Assignee).Include(t => t.Project);
+                var tickets = db.Tickets.Where(t => t.AssigneeId == userID).Include(t => t.Comments).Include(t => t.Creater).Include(t => t.Assignee).Include(t => t.Project);
                 return View("Index", tickets.ToList());
             }
             if (User.IsInRole("Project Manager"))
@@ -55,19 +55,6 @@ namespace BugTracker.Controllers
             }
 
             return View("Index");
-        }
-
-        // Project Manger and Developer Tickets
-        [Authorize(Roles = "Developer,Project Manager")]
-        public ActionResult ProjectManagerOrDeveloperTickets()
-        {
-            string userId = User.Identity.GetUserId();
-            var ProjectMangerOrDeveloperId = db.Users.Where(p => p.Id == userId).FirstOrDefault();
-            //var ProjectId = ProjectMangerOrDeveloperId.Projects.Select(p => p.Id).FirstOrDefault();
-            //var tickets = db.Tickets.Where(p => p.Id == projectsIds).ToList();
-            var projectsIds = ProjectMangerOrDeveloperId.Projects.Select(p => p.Id).ToList();
-            var tickets1 = db.Tickets.Where(p => projectsIds.Contains(p.ProjectId)).ToList();
-            return View("Index", tickets1);
         }
 
         public ActionResult AssignDeveloper(int ticketId)
@@ -104,6 +91,31 @@ namespace BugTracker.Controllers
             }
             return View(tickets);
         }
+        [HttpPost]
+        [Authorize]
+        public ActionResult CreateComment(int id, string body)
+        {
+            var ticket = db.Tickets
+               .Where(p => p.Id == id)
+               .FirstOrDefault();
+            if (ticket == null)
+            {
+                return HttpNotFound();
+            }
+            if (string.IsNullOrWhiteSpace(body))
+            {
+                TempData["Error"] = "Comment box is empty";
+                return RedirectToAction("Details", new { ticket.Id });
+            }
+            var comment = new TicketComment();
+            comment.UserId = User.Identity.GetUserId();
+            comment.TicketId = ticket.Id;
+            comment.Created = DateTime.Now;
+            comment.Comment = body;
+            db.TicketComments.Add(comment);
+            db.SaveChanges();
+            return RedirectToAction("Details", new { id });
+        }
 
         // GET: Tickets/Create
         [Authorize(Roles = "Submitter")]
@@ -127,7 +139,10 @@ namespace BugTracker.Controllers
         {
             if (ModelState.IsValid)
             {
-                tickets.CreaterId = User.Identity.GetUserId();
+                if (tickets == null)
+                {
+                    return HttpNotFound();
+                }
                 tickets.TicketStatusId = 3;
                 db.Tickets.Add(tickets);
                 db.SaveChanges();
@@ -140,6 +155,42 @@ namespace BugTracker.Controllers
             return View(tickets);
         }
 
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        //[Authorize(Roles = "Submitter")]
+        public ActionResult CreateAttachment(int ticketId, [Bind(Include = "Id,Description,TicketTypeId")] TicketAttachment ticketAttachment, HttpPostedFileBase image)
+        {
+            if (ModelState.IsValid)
+            {
+                var tickets = db.Tickets.FirstOrDefault(t => t.Id == ticketId);
+
+                if (!ImageUploadValidator.IsWebFriendlyImage(image))
+                {
+                    ViewBag.ErrorMessage = "upload image";
+
+                }
+                if (image == null)
+                {
+                    return HttpNotFound();
+                }
+                var FileUsed = Path.GetFileName(image.FileName);
+                if (!Directory.Exists(Server.MapPath("~/Uploads/")))
+                {
+                    Directory.CreateDirectory(Server.MapPath("~/Uploads/"));
+                }
+                image.SaveAs(Path.Combine(Server.MapPath("~/Uploads/"), FileUsed));
+                ticketAttachment.FilePath = "/Uploads/" + FileUsed;
+                ticketAttachment.UserId = User.Identity.GetUserId();
+                ticketAttachment.Created = DateTime.Now;
+                ticketAttachment.UserId = User.Identity.GetUserId();
+                ticketAttachment.TicketId = ticketId;
+                db.TicketAttachments.Add(ticketAttachment);
+                db.SaveChanges();
+                return RedirectToAction("Details", new { id = ticketId });
+            }
+            return View(ticketAttachment);
+        }
         // GET: Tickets/Edit/5
         public ActionResult Edit(int? id)
         {
@@ -167,22 +218,44 @@ namespace BugTracker.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "Id,Name,Description,TicketTypeId,TicketPriorityId,CreaterId,TicketStatusId,AssigneeId,ProjectId")] Tickets tickets)
-        {
-            if (ModelState.IsValid)
+        {if (ModelState.IsValid)
             {
-                var DbTicket = db.Tickets.FirstOrDefault(p => p.Id == tickets.Id);
-                DbTicket.Name = tickets.Name;
-                DbTicket.Description = tickets.Description;
-                DbTicket.Updated = DateTime.Now;
+                var dateChanged = DateTimeOffset.Now;
+                var changes = new List<TicketHistory>();
+
+                var dbTicket = db.Tickets.First(p => p.Id == tickets.Id);
+
+                dbTicket.Name = tickets.Name;
+                dbTicket.Description = tickets.Description;
+                dbTicket.TicketTypeId = tickets.TicketTypeId;
+                dbTicket.Updated = dateChanged;
+
+                var originalValues = db.Entry(dbTicket).OriginalValues;
+                var currentValues = db.Entry(dbTicket).CurrentValues;
+
+                foreach(var property in originalValues.PropertyNames)
+                {
+                    var originalValue = originalValues[property]?.ToString();
+                    var currentValue = currentValues[property]?.ToString();
+
+                    if (originalValue != currentValue)
+                    {
+                        var history = new TicketHistory();
+                        history.Changed = dateChanged;
+                        history.NewValue = currentValue;
+                        history.OldValue = originalValue;
+                        history.Property = property;
+                        history.TicketId = dbTicket.Id;
+                        history.UserId = User.Identity.GetUserId();
+                        changes.Add(history);
+                    }
+                }
+
+                db.TicketHistories.AddRange(changes);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            ViewBag.AssigneeId = new SelectList(db.Users, "Id", "DisplayName", tickets.AssigneeId);
-            ViewBag.CreaterId = new SelectList(db.Users, "Id", "DisplayName", tickets.CreaterId);
-            ViewBag.ProjectId = new SelectList(db.Projects, "Id", "Name", tickets.ProjectId);
-            ViewBag.TicketPriorityId = new SelectList(db.TicketPriorities, "Id", "Name", tickets.TicketPriorityId);
-            ViewBag.TicketStatusId = new SelectList(db.TicketStatuses, "Id", "Name", tickets.TicketStatusId);
-            ViewBag.TicketTypeId = new SelectList(db.TicketTypes, "Id", "Name", tickets.TicketTypeId);
+
             return View(tickets);
         }
 

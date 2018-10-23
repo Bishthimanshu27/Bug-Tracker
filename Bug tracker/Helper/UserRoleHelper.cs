@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace BugTracker.helper
+namespace Bug_tracker.helper
 {
     public class UserRoleHelper
     {
