@@ -44,6 +44,7 @@ namespace Bug_tracker.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Project Manager,Developer,Submitter")]
         public ActionResult Create([Bind(Include = "Id,Cpmment,Created,TicketId,UserId")] TicketComment ticketComment)
         {
             if (ModelState.IsValid)

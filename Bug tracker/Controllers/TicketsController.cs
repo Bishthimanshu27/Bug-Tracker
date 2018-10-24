@@ -92,7 +92,7 @@ namespace Bug_tracker.Controllers
             return View(tickets);
         }
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "Admin, Project Manager,Submitter,Developer")]
         public ActionResult CreateComment(int id, string body)
         {
             var ticket = db.Tickets
@@ -217,6 +217,7 @@ namespace Bug_tracker.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Project Manager,Developer")]
         public ActionResult Edit([Bind(Include = "Id,Name,Description,TicketTypeId,TicketPriorityId,CreaterId,TicketStatusId,AssigneeId,ProjectId")] Tickets tickets)
         {if (ModelState.IsValid)
             {
@@ -229,6 +230,9 @@ namespace Bug_tracker.Controllers
                 dbTicket.Description = tickets.Description;
                 dbTicket.TicketTypeId = tickets.TicketTypeId;
                 dbTicket.Updated = dateChanged;
+                dbTicket.TicketPriorityId = tickets.TicketPriorityId;
+                dbTicket.TicketStatusId = tickets.TicketStatusId;
+                dbTicket.TicketTypeId = tickets.TicketTypeId;
 
                 var originalValues = db.Entry(dbTicket).OriginalValues;
                 var currentValues = db.Entry(dbTicket).CurrentValues;
