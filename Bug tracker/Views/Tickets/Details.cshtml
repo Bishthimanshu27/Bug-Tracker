@@ -106,9 +106,9 @@
                         {
                             <input type="hidden" name="slug" value="@Model.Comments" />
                             <textarea name="Body"></textarea>
-                            if (ViewBag.ErrorMessage != null)
+                            if (TempData["Errormessage"] != null)
                             {
-                                <span>@ViewBag.ErrorMessage</span>
+                                <p>@TempData["Errormessage"]</p>
                             }
                             <input type="submit" value="submit" />
                         }
@@ -118,9 +118,9 @@
                         {
                             @Html.AntiForgeryToken()
                             <input name="image" type="file" class="form-control" id="fileUpload" />
-                            if (ViewBag.ErrorMessage != null)
+                            if (TempData["ErrorMessage"] != null)
                             {
-                                <span>@ViewBag.ErrorMessage</span>
+                                <p>@TempData["ErrorMessage"]</p>
                             }
                             <input type="submit" value="submit" />
                         }
@@ -142,7 +142,7 @@
                                     Changed
                                 </th>
                                 <th>
-                                    Modifier User
+                                    Modifier
                                 </th>
                             </tr>
                         </thead>

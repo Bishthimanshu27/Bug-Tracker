@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.Entity;
+﻿using System.Data.Entity;
 using System.Linq;
 using System.Net;
-using System.Web;
+using System.Net.Mail;
+using System.Web.Configuration;
 using System.Web.Mvc;
 using Bug_tracker.Models;
 
@@ -14,11 +12,14 @@ namespace Bug_tracker.Controllers
     {
         private ApplicationDbContext db = new ApplicationDbContext();
 
+        // GET: TicketComments
         public ActionResult Index()
         {
             var ticketComments = db.TicketComments.Include(t => t.Ticket).Include(t => t.User);
             return View(ticketComments.ToList());
         }
+
+        // GET: TicketComments/Details/5
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -32,6 +33,7 @@ namespace Bug_tracker.Controllers
             }
             return View(ticketComment);
         }
+
         // GET: TicketComments/Create
         public ActionResult Create()
         {
@@ -39,12 +41,13 @@ namespace Bug_tracker.Controllers
             ViewBag.UserId = new SelectList(db.Users, "Id", "LastName");
             return View();
         }
+
         // POST: TicketComments/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin,Project Manager,Developer,Submitter")]
+        [Authorize(Roles = "Admin,Project Manager,Submitter,Developer")]
         public ActionResult Create([Bind(Include = "Id,Cpmment,Created,TicketId,UserId")] TicketComment ticketComment)
         {
             if (ModelState.IsValid)
@@ -57,6 +60,7 @@ namespace Bug_tracker.Controllers
             ViewBag.TicketId = new SelectList(db.Tickets, "Id", "Name", ticketComment.TicketId);
             ViewBag.UserId = new SelectList(db.Users, "Id", "LastName", ticketComment.UserId);
             return View(ticketComment);
+
         }
 
         // GET: TicketComments/Edit/5
@@ -75,12 +79,13 @@ namespace Bug_tracker.Controllers
             ViewBag.UserId = new SelectList(db.Users, "Id", "LastName", ticketComment.UserId);
             return View(ticketComment);
         }
+
         // POST: TicketComments/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,Cpmment,Created,TicketId,UserId")] TicketComment ticketComment)
+        public ActionResult Edit([Bind(Include = "Id,Comment,Created,TicketId,UserId")] TicketComment ticketComment)
         {
             if (ModelState.IsValid)
             {
@@ -92,6 +97,7 @@ namespace Bug_tracker.Controllers
             ViewBag.UserId = new SelectList(db.Users, "Id", "LastName", ticketComment.UserId);
             return View(ticketComment);
         }
+
         // GET: TicketComments/Delete/5
         public ActionResult Delete(int? id)
         {
@@ -117,6 +123,7 @@ namespace Bug_tracker.Controllers
             db.SaveChanges();
             return RedirectToAction("Index");
         }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)

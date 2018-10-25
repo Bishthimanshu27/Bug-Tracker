@@ -11,6 +11,8 @@ using Bug_tracker.Models;
 using Bug_tracker.Models.Classes;
 using Microsoft.AspNet.Identity;
 using Bug_tracker.helper;
+using System.Net.Mail;
+using System.Web.Configuration;
 
 namespace Bug_tracker.Controllers
 {
@@ -98,21 +100,32 @@ namespace Bug_tracker.Controllers
             var ticket = db.Tickets
                .Where(p => p.Id == id)
                .FirstOrDefault();
+            var userId = User.Identity.GetUserId();
             if (ticket == null)
             {
                 return HttpNotFound();
             }
+
             if (string.IsNullOrWhiteSpace(body))
             {
-                TempData["Error"] = "Comment box is empty";
-                return RedirectToAction("Details", new { ticket.Id });
+                TempData["Errormessage"] = "Comment is Mandatory";
+                return RedirectToAction("Details", new { id });
             }
-            var comment = new TicketComment();
-            comment.UserId = User.Identity.GetUserId();
-            comment.TicketId = ticket.Id;
-            comment.Created = DateTime.Now;
-            comment.Comment = body;
-            db.TicketComments.Add(comment);
+           
+                var comment = new TicketComment();
+                comment.UserId = User.Identity.GetUserId();
+                comment.TicketId = ticket.Id;
+                comment.Created = DateTime.Now;
+                comment.Comment = body;
+                db.TicketComments.Add(comment);
+                var user = db.Users.FirstOrDefault(p => p.Id == comment.UserId);
+                var personalEmailService = new PersonalEmailServices();
+                var mailMessage = new MailMessage(WebConfigurationManager.AppSettings["emailto"], user.Email);
+                mailMessage.Body = "Someone commented on your Ticket";
+                mailMessage.Subject = "ticket created";
+                mailMessage.IsBodyHtml = true;
+                personalEmailService.Send(mailMessage);
+            
             db.SaveChanges();
             return RedirectToAction("Details", new { id });
         }
@@ -167,8 +180,8 @@ namespace Bug_tracker.Controllers
 
                 if (!ImageUploadValidator.IsWebFriendlyImage(image))
                 {
-                    ViewBag.ErrorMessage = "upload image";
-
+                    TempData["ErrorMessage"] = "uploading image is Mandatory";
+                    return RedirectToAction("Details", new { id = ticketId });
                 }
                 if (image == null)
                 {
@@ -246,8 +259,8 @@ namespace Bug_tracker.Controllers
                     {
                         var history = new TicketHistory();
                         history.Changed = dateChanged;
-                        history.NewValue = currentValue;
-                        history.OldValue = originalValue;
+                        history.NewValue = GetValueFromKey(property, currentValue);
+                        history.OldValue = GetValueFromKey(property, originalValue);
                         history.Property = property;
                         history.TicketId = dbTicket.Id;
                         history.UserId = User.Identity.GetUserId();
@@ -263,6 +276,23 @@ namespace Bug_tracker.Controllers
             return View(tickets);
         }
 
+        private string GetValueFromKey(string propertyName, string key)
+        {
+            if (propertyName == "TicketTypeId")
+            {
+                return db.TicketTypes.Find(Convert.ToInt32(key)).Name;
+            }
+            if (propertyName == "TicketPriorityId")
+            {
+                return db.TicketTypes.Find(Convert.ToInt32(key)).Name;
+            }
+            if (propertyName == "TicketStatusId")
+            {
+                return db.TicketTypes.Find(Convert.ToInt32(key)).Name;
+            }
+
+            return key;
+        }
         // GET: Tickets/Delete/5
         public ActionResult Delete(int? id)
         {

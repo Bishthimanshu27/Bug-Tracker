@@ -210,6 +210,7 @@
     <Compile Include="Models\AssignDevelopersTicketModel.cs" />
     <Compile Include="Models\Classes\Project.cs" />
     <Compile Include="Models\ImageUploadValidator.cs" />
+    <Compile Include="Models\PersonalEmailServices.cs" />
     <Compile Include="Models\ProjectAssignViewModel.cs" />
     <Compile Include="Models\Classes\TicketPriority.cs" />
     <Compile Include="Models\Classes\Tickets.cs" />
@@ -305,7 +306,9 @@
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\sparkline-chart.js" />
     <Content Include="Scripts\zabuto_calendar.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -362,6 +365,7 @@
     <Content Include="Views\TicketComments\Details.cshtml" />
     <Content Include="Views\TicketComments\Edit.cshtml" />
     <Content Include="Views\TicketComments\Index.cshtml" />
+    <Content Include="private.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

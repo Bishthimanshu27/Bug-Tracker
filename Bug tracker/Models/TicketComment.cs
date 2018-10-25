@@ -16,6 +16,9 @@ namespace Bug_tracker.Models
         public string UserId { get; set; }
         public virtual ApplicationUser User { get; set; }
 
+        public string AssigneeId { get; set; }
+        public virtual ApplicationUser Assignee { get; set; }
+
         public TicketComment()
         {
             Created = DateTime.Now;
