@@ -59,22 +59,31 @@ namespace Bug_tracker.Controllers
             return View("Index");
         }
 
-        public ActionResult AssignDeveloper(int ticketId)
-        {
+        [Authorize(Roles = "Admin,Project Manager")]
+        public ActionResult AssignDeveloper(int id)
+        { 
             var model = new AssignDevelopersTicketModel();
-            var ticket = db.Tickets.FirstOrDefault(p => p.Id == ticketId);
+            var ticket = db.Tickets.FirstOrDefault(p => p.Id == id);
             var userRoleHelper = new UserRoleHelper();
             var users = userRoleHelper.UsersInRole("Developer");
-            model.TicketId = ticketId;
-            model.DeveloperList = new SelectList(users, "Id", "Name");
+            model.TicketId = id;
+            model.DeveloperList = new SelectList(users, "Id", "DisplayName");
             return View(model);
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Project Manager")]
         public ActionResult AssignDeveloper(AssignDevelopersTicketModel model)
         {
             var ticket = db.Tickets.FirstOrDefault(p => p.Id == model.TicketId);
-            ticket.AssigneeId = model.SelectedDeveloperId;
+            ticket.AssigneeId = model.SelectedDeveloperId;     
+            var user = db.Users.FirstOrDefault(p => p.Id == model.SelectedDeveloperId);
+            var personalEmailService = new PersonalEmailServices();
+            var mailMessage = new MailMessage(WebConfigurationManager.AppSettings["emailto"], user.Email);
+            mailMessage.Body = "Someone Assign you a ticket";
+            mailMessage.Subject = "Assign";
+            mailMessage.IsBodyHtml = true;
+            personalEmailService.Send(mailMessage);
             db.SaveChanges();
             return RedirectToAction("Index");
         }
@@ -122,7 +131,7 @@ namespace Bug_tracker.Controllers
                 var personalEmailService = new PersonalEmailServices();
                 var mailMessage = new MailMessage(WebConfigurationManager.AppSettings["emailto"], user.Email);
                 mailMessage.Body = "Someone commented on your Ticket";
-                mailMessage.Subject = "ticket created";
+                mailMessage.Subject = "Comment";
                 mailMessage.IsBodyHtml = true;
                 personalEmailService.Send(mailMessage);
             
@@ -199,6 +208,14 @@ namespace Bug_tracker.Controllers
                 ticketAttachment.UserId = User.Identity.GetUserId();
                 ticketAttachment.TicketId = ticketId;
                 db.TicketAttachments.Add(ticketAttachment);
+                var user = db.Users.FirstOrDefault(p => p.Id == ticketAttachment.UserId);
+                var personalEmailService = new PersonalEmailServices();
+                var mailMessage = new MailMessage(
+                WebConfigurationManager.AppSettings["emailto"], user.Email);
+                mailMessage.Body = "You have a new attachment";
+                mailMessage.Subject = "New Attachment";
+                mailMessage.IsBodyHtml = true;
+                personalEmailService.Send(mailMessage);
                 db.SaveChanges();
                 return RedirectToAction("Details", new { id = ticketId });
             }

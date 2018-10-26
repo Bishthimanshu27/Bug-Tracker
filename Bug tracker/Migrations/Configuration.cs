@@ -60,6 +60,86 @@ namespace Bug_tracker.Migrations
                 userManager.AddToRole(adminUser.Id, "Admin");
             }
 
+            ApplicationUser DemoAdmin = new ApplicationUser();
+            ApplicationUser DemoProjectManger = new ApplicationUser();
+            ApplicationUser DemoDeveloper = new ApplicationUser();
+            ApplicationUser DemoSubmitter = new ApplicationUser();
+
+            if (!context.Users.Any(item => item.Email == "DemoAdmin@admin.com"))
+            {
+                DemoAdmin = new ApplicationUser();
+                DemoAdmin.UserName = "DemoAdmin@admin.com";
+                DemoAdmin.Email = "DemoAdmin@admin.com";
+                DemoAdmin.LastName = "Admin";
+                DemoAdmin.FirstName = "Himanshu";
+                DemoAdmin.DisplayName = "Himanshu Bisht";
+                userManager.Create(adminUser, "Password-1");
+            }
+            else
+            {
+                adminUser = context.Users.FirstOrDefault(item => item.UserName == "DemoAdmin@admin.com");
+            }
+            if (!userManager.IsInRole(DemoAdmin.Id, "DemoAdmin"))
+            {
+                userManager.AddToRole(DemoAdmin.Id, "DemoAdmin");
+            }
+
+            if (!context.Users.Any(item => item.Email == "DemoProjectManger@admin.com"))
+            {
+                DemoProjectManger = new ApplicationUser();
+                DemoProjectManger.UserName = "DemoProjectManger@admin.com";
+                DemoProjectManger.Email = "DemoProjectManger@admin.com";
+                DemoProjectManger.LastName = "Admin";
+                DemoProjectManger.FirstName = "Himanshu";
+                DemoProjectManger.DisplayName = "Himanshu Bisht";
+                userManager.Create(adminUser, "Password-1");
+            }
+            else
+            {
+                adminUser = context.Users.FirstOrDefault(item => item.UserName == "DemoProjectManger@admin.com");
+            }
+            if (!userManager.IsInRole(DemoProjectManger.Id, "DemoProjectManger"))
+            {
+                userManager.AddToRole(DemoProjectManger.Id, "DemoProjectManger");
+            }
+
+            if (!context.Users.Any(item => item.Email == "DemoDeveloper@admin.com"))
+            {
+                DemoDeveloper = new ApplicationUser();
+                DemoDeveloper.UserName = "DemoDeveloper@admin.com";
+                DemoDeveloper.Email = "DemoDeveloper@admin.com";
+                DemoDeveloper.LastName = "Admin";
+                DemoDeveloper.FirstName = "Himanshu";
+                DemoDeveloper.DisplayName = "Himanshu Bisht";
+                userManager.Create(adminUser, "Password-1");
+            }
+            else
+            {
+                DemoDeveloper = context.Users.FirstOrDefault(item => item.UserName == "DemoDeveloper@admin.com");
+            }
+            if (!userManager.IsInRole(DemoDeveloper.Id, "DemoDeveloper"))
+            {
+                userManager.AddToRole(DemoDeveloper.Id, "DemoDeveloper");
+            }
+
+            if (!context.Users.Any(item => item.Email == "DemoSubmitter@admin.com"))
+            {
+                DemoSubmitter = new ApplicationUser();
+                DemoSubmitter.UserName = "DemoSubmitter@admin.com";
+                DemoSubmitter.Email = "DemoSubmitter@admin.com";
+                DemoSubmitter.LastName = "Admin";
+                DemoSubmitter.FirstName = "Himanshu";
+                DemoSubmitter.DisplayName = "Himanshu Bisht";
+                userManager.Create(adminUser, "Password-1");
+            }
+            else
+            {
+                adminUser = context.Users.FirstOrDefault(item => item.UserName == "DemoSubmitter@admin.com");
+            }
+            if (!userManager.IsInRole(DemoSubmitter.Id, "DemoSubmitter"))
+            {
+                userManager.AddToRole(DemoSubmitter.Id, "DemoSubmitter");
+            }
 
             context.TicketTypes.AddOrUpdate(x => x.Id,
                 new Models.Classes.TicketType() { Id = 1, Name = "Bug Fixes" },

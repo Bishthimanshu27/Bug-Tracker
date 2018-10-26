@@ -52,6 +52,17 @@ namespace Bug_tracker.Controllers
             }
         }
 
+        //public ActionResult DemoProfiles()
+        //{
+        //    var user = new ApplicationUser();
+
+        //    AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
+
+        //    SignInManager.SignIn(user, false, false);
+
+        //    return 
+
+        //}
         //
         // GET: /Account/Login
         [AllowAnonymous]
@@ -160,9 +171,7 @@ namespace Bug_tracker.Controllers
                 if (result.Succeeded)
                 {
                     await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
-
-                    // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
-                    // Send an email with this link
+                    
                     string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
                     var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
                     await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
@@ -172,7 +181,6 @@ namespace Bug_tracker.Controllers
                 AddErrors(result);
             }
 
-            // If we got this far, something failed, redisplay form
             return View(model);
         }
 

@@ -1,0 +1,28 @@
+﻿@model Bug_tracker.Models.AssignDevelopersTicketModel
+@{
+    ViewBag.Title = "AssignUsers";
+}
+    <section id="main-content">
+        <section class="wrapper site-min-height">
+            <h3><i class="fa fa-angle-right"></i> Blank Page</h3>
+            <div class="row mt">
+                <div class="col-lg-12">
+                    <p>
+
+                        <h2>Assign users to Project</h2>
+                        <hr />
+                        <section class="content">
+                            @using (Html.BeginForm())
+                            {<div class="form-group">
+                                    @Html.HiddenFor(p => p.TicketId)
+                                    @Html.DropDownListFor(p => p.SelectedDeveloperId, Model.DeveloperList, htmlAttributes: new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.DeveloperList, "", new { @class = "text-danger" })
+                                    <input type="submit" value="Submit!" />
+                                </div>
+                            }
+                         </section>
+                    </p>
+                </div>
+            </div>
+        </section>
+     </section>
