@@ -173,7 +173,6 @@ namespace Bug_tracker.Controllers
             return View(tickets);
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         //[Authorize(Roles = "Submitter")]
@@ -216,6 +215,7 @@ namespace Bug_tracker.Controllers
             }
             return View(ticketAttachment);
         }
+
         // GET: Tickets/Edit/5
         public ActionResult Edit(int? id)
         {
@@ -305,6 +305,7 @@ namespace Bug_tracker.Controllers
 
             return key;
         }
+
         // GET: Tickets/Delete/5
         public ActionResult Delete(int? id)
         {
