@@ -38,7 +38,7 @@ namespace Bug_tracker.Controllers
         }
 
         //Get UsreTickets
-        public ActionResult UserTickets()
+        public ActionResult yourtickets()
         {
             string userID = User.Identity.GetUserId();
             if (User.IsInRole("Submitter"))
@@ -106,9 +106,7 @@ namespace Bug_tracker.Controllers
         [Authorize(Roles = "Admin, Project Manager,Submitter,Developer")]
         public ActionResult CreateComment(int id, string body)
         {
-            var ticket = db.Tickets
-               .Where(p => p.Id == id)
-               .FirstOrDefault();
+            var ticket = db.Tickets.Where(p => p.Id == id).FirstOrDefault();
             var userId = User.Identity.GetUserId();
             if (ticket == null)
             {
@@ -119,8 +117,7 @@ namespace Bug_tracker.Controllers
             {
                 TempData["Errormessage"] = "Comment is Mandatory";
                 return RedirectToAction("Details", new { id });
-            }
-           
+            }          
                 var comment = new TicketComment();
                 comment.UserId = User.Identity.GetUserId();
                 comment.TicketId = ticket.Id;
@@ -170,7 +167,6 @@ namespace Bug_tracker.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-
             ViewBag.ProjectId = new SelectList(db.Projects, "Id", "Name", tickets.ProjectId);
             ViewBag.TicketPriorityId = new SelectList(db.TicketPriorities, "Id", "Name", tickets.TicketPriorityId);
             ViewBag.TicketTypeId = new SelectList(db.TicketTypes, "Id", "Name", tickets.TicketTypeId);
@@ -186,7 +182,6 @@ namespace Bug_tracker.Controllers
             if (ModelState.IsValid)
             {
                 var tickets = db.Tickets.FirstOrDefault(t => t.Id == ticketId);
-
                 if (!ImageUploadValidator.IsWebFriendlyImage(image))
                 {
                     TempData["ErrorMessage"] = "uploading image is Mandatory";

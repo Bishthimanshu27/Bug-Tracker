@@ -254,6 +254,15 @@
                             <li><a href="@Url.Action("UserTickets", "tickets")">Your Tickets</a></li>
                         </ul>
                     </li>
+                    <li class="menu-list">
+                        <a href="#"><i class="fa fa-map-marker"></i> <span>Demo users</span></a>
+                        <ul class="sub-menu-list">
+                            <li><a href="@Url.Action("DemoProfiles", "Account", new { name = "Admin"})">Admin</a></li>
+                            <li><a href="@Url.Action("DemoProfiles", "Account", new { name = "Project Manager"})">Project manager</a></li>
+                            <li><a href="@Url.Action("DemoProfiles", "Account", new { name = "Developer"})">Developer</a></li>
+                            <li><a href="@Url.Action("DemoProfiles", "Account", new { name = "Submitter"})">Submitter</a></li>
+                        </ul>
+                    </li>
 
                 </ul>
                 <!-- sidebar menu end-->
